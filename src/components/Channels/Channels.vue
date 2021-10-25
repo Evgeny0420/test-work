@@ -12,9 +12,9 @@
       </div>
     </div>
     <ul v-if='buttonAll' class='channels__list'>
-      <li class='channels__item' v-for='channel in this.$store.state.channels.channels' :key='channel.id'>
+      <li class='channels__item' v-for='channel in this.allChannels' :key='channel.id'>
         <Channel
-            :channel='channel'
+            :channel="channel"
             @addToFavorite='addToFavorite(channel)'
         />
       </li>
@@ -22,7 +22,7 @@
     <ul v-else class='channels__list'>
       <li class='channels__item' v-for='channel in this.favoriteChannels' :key='channel.id'>
         <Channel
-            :channel='channel'
+            :channel="channel"
             @addToFavorite='addToFavorite(channel)'
         />
       </li>
@@ -33,41 +33,57 @@
 <script>
 import {mapGetters, mapActions} from 'vuex'
 import Channel from './Channel/Channel'
-let allFavoriteChannels = window.localStorage.getItem('favoriteChannels')
+let allFavoriteChannels = localStorage.getItem('favoriteChannels')
 
 export default {
   name: 'Channels',
   data: function () {
     return {
-      favoriteChannels: [],
+      favoriteChannels: allFavoriteChannels ? JSON.parse(allFavoriteChannels) : [],
       buttonAll: true
     }
   },
   components: {Channel},
-  computed: mapGetters(['allChannels']),
+  computed: {
+    ...mapGetters(['allChannels']),
+  },
+
   methods: {
     ...mapActions(['fetchChannels']),
-    saveToLocalStorageFavoriteChannel () {
-      window.localStorage.removeItem('favoriteChannels')
-      window.localStorage.setItem('favoriteChannels', JSON.stringify(this.favoriteChannels));
-    },
-    addToFavorite(favoriteChannel) {
-      if (!this.favoriteChannels.includes(favoriteChannel)) {
-        favoriteChannel.fav = true
-        this.favoriteChannels.push(favoriteChannel)
-      } else {
-        const index = this.favoriteChannels.findIndex(item => item.id === favoriteChannel.id)
-        this.favoriteChannels.splice(index, 1)
-        favoriteChannel.fav = false
+
+    channelFav() {
+      for (const channel of this.allChannels) {
+        for (const favoriteChannel of this.favoriteChannels) {
+          if (favoriteChannel.id === channel.id) {
+            channel.fav = true
+          }
+        }
       }
-      this.saveToLocalStorageFavoriteChannel()
+    },
+
+    addToFavorite(channel) {
+      if (channel.fav === true) {
+        const index = this.favoriteChannels.findIndex(item => item.id === channel.id)
+          this.favoriteChannels.splice(index, 1)
+          channel.fav = false
+      } else {
+        channel.fav = true
+        this.favoriteChannels.push(channel)
+      }
+
+      localStorage.removeItem('favoriteChannels')
+      localStorage.setItem('favoriteChannels', JSON.stringify(this.favoriteChannels));
     },
   },
+
+  beforeUpdate() {
+    this.channelFav()
+  },
+
   mounted() {
     this.fetchChannels()
-    this.favoriteChannels ? JSON.parse(allFavoriteChannels) : []
-  }
-};
+  },
+}
 </script>
 
 <style lang='scss'>
