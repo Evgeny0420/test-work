@@ -3,18 +3,14 @@
     <div class='channels__header'>
       <h2 class='channels__title'>Телеканалы</h2>
       <div class='channels__all-favorite-wrapper'>
-        <button class='channels__all' :class='{active: buttonAll}' @click='buttonAll = true'>
-          <span>Все</span>
-        </button>
-        <button class='channels__favorite' :class='{active: !buttonAll}' @click='buttonAll = false'>
-          <span>Избранные</span>
-        </button>
+        <button class='channels__all' :class='{active: buttonAll}' @click='buttonAll = true'>Все</button>
+        <button class='channels__favorite' :class='{active: !buttonAll}' @click='buttonAll = false'>Избранные</button>
       </div>
     </div>
     <ul v-if='buttonAll' class='channels__list'>
       <li class='channels__item' v-for='channel in this.allChannels' :key='channel.id'>
         <Channel
-            :channel="channel"
+            :channel='channel'
             @addToFavorite='addToFavorite(channel)'
         />
       </li>
@@ -22,7 +18,7 @@
     <ul v-else class='channels__list'>
       <li class='channels__item' v-for='channel in this.favoriteChannels' :key='channel.id'>
         <Channel
-            :channel="channel"
+            :channel='channel'
             @addToFavorite='addToFavorite(channel)'
         />
       </li>
